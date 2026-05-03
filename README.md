@@ -2,6 +2,12 @@
 
 **Your AI voice journaling companion** — Speak your thoughts, get AI responses that make you think, and track your mood over time.
 
+## 🌐 Live Demo
+
+🚀 **Production**: [https://voicejournal-psi.vercel.app](https://voicejournal-psi.vercel.app)  
+📦 **GitHub**: [https://github.com/chinmaycode1/voice_journal_ai](https://github.com/chinmaycode1/voice_journal_ai)  
+🔧 **Local Dev**: http://localhost:5174/
+
 ## ✨ Features
 
 ### Core Features
@@ -157,51 +163,35 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 🧑‍🎤 Creating Your Own Avatars
+## 🧑‍🎤 Avatar System - SVG Animated Faces
 
-The app comes with a default 3D avatar, but you can create custom avatars for each AI personality!
+The app features **5 unique animated SVG cartoon faces** - one for each AI personality!
 
-### Steps to Create Custom Avatars:
+### ✨ Features:
+- ✅ **100% Offline** - No external dependencies or network requests
+- ✅ **Realistic Animations** - Blinking, lip-sync, mood expressions
+- ✅ **Unique Designs** - Each personality has distinct features:
+  - **Therapist** 🧘: Warm skin, blue eyes, glasses, blush cheeks
+  - **Hype Friend** 🔥: Tan skin, dark eyes, baseball cap
+  - **Philosopher** 🌌: Darker skin, beard & mustache
+  - **Roast Mode** 😈: Medium skin, squinting eyes, smirk
+  - **Poet** ✨: Pink-tinted skin, purple eyes, flowing hair
 
-1. **Go to Ready Player Me**
-   - Visit [https://readyplayer.me](https://readyplayer.me)
-   - Click "Try it for free"
+### 🎬 Animations:
+- **Blinking**: Natural eye blinks every 2-5 seconds
+- **Lip-sync**: Procedural mouth movements when speaking
+- **Listening**: Eyebrows raise, ear waves appear
+- **Mood-based**: Facial expressions change with detected mood
+- **3D Flip**: Smooth card rotation when switching modes
+- **Sound Waves**: Animated waves beside mouth when speaking
 
-2. **Create 5 Different Avatars** (one for each personality):
-   - **Therapist**: Calm, professional look (business casual, glasses)
-   - **Hype Friend**: Casual, energetic look (hoodie, cap, bright colors)
-   - **Philosopher**: Thoughtful, older appearance (beard, wise expression)
-   - **Roast Mode**: Sarcastic smirk expression (edgy style)
-   - **Poet**: Artistic, expressive look (creative outfit, dreamy vibe)
-
-3. **Export with Correct Settings**
-   - After creating each avatar, copy the GLB URL
-   - Add these URL parameters to each URL:
-     ```
-     ?morphTargets=ARKit,Oculus+Visemes,mouthOpen,mouthSmile,eyesClosed,eyesLookUp,eyesLookDown&textureSizeLimit=1024&textureFormat=png
-     ```
-   - This enables facial animations and lip-sync
-
-4. **Download and Save**
-   - Download each `.glb` file
-   - Save them to `public/avatars/` with these exact names:
-     - `therapist.glb`
-     - `hype.glb`
-     - `philosopher.glb`
-     - `roast.glb`
-     - `poet.glb`
-
-5. **Restart Dev Server**
-   - Stop the dev server (Ctrl + C)
-   - Run `npm run dev` again
-   - Your custom avatars will appear!
-
-### Avatar Features:
-- ✅ **Lip-sync** - Mouth moves when AI speaks
-- ✅ **Listening animations** - Attentive lean when you record
-- ✅ **Mood expressions** - Face changes based on detected mood
-- ✅ **Idle animations** - Natural blinking and micro-movements
-- ✅ **Interactive** - Drag to rotate the avatar slightly
+### 🎨 Customization:
+All avatar designs are in `src/components/avatar/AvatarFace.tsx`. You can customize:
+- Face shapes and colors
+- Eye styles and colors
+- Accessories (glasses, hats, beards, hair)
+- Animation timings
+- Mood expressions
 
 ---
 
