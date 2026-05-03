@@ -1,0 +1,16 @@
+{
+  "name": "VoiceJournal",
+  "short_name": "VoiceJournal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090F",
+  "theme_color": "#7C6FFF",
+  "description": "Your AI voice journaling companion",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
