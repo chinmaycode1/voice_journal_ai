@@ -139,6 +139,13 @@ function AvatarCard({
               repeat: (isSpeaking || isListening) ? Infinity : 0,
               ease: 'easeInOut',
             }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'visible',
+              padding: '10px'
+            }}
           >
             <AvatarFace
               modeId={activeModeId}

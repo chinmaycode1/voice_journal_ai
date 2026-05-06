@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList
@@ -40,24 +40,46 @@ export function useVoiceRecorder() {
   
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
-  useEffect(() => {
-    // Check for speech recognition support (works on Chrome, Edge, Safari)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    
-    if (!SpeechRecognition) {
-      setIsSupported(false)
-      setError('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.')
+  const startRecording = useCallback(async () => {
+    // Check HTTPS requirement
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      setError('Voice recording requires HTTPS. Please use the deployed version.')
       return
     }
 
-    const recognition = new SpeechRecognition()
+    // Check browser support
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     
-    // Mobile-optimized settings
-    recognition.continuous = true  // Keep listening
-    recognition.interimResults = true  // Show interim results
+    if (!SpeechRecognition) {
+      setIsSupported(false)
+      setError('Speech recognition not supported. Please use Chrome, Edge, or Safari.')
+      return
+    }
+
+    // Request microphone permission FIRST
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach(track => track.stop()) // immediately stop, we just needed permission
+      console.log('✅ Microphone permission granted')
+    } catch (err: any) {
+      console.error('Microphone permission error:', err)
+      setError('Microphone access denied. Please allow microphone in browser settings and reload.')
+      return
+    }
+
+    // Create FRESH recognition instance
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false  // Changed back to false for better control
+    recognition.interimResults = true
     recognition.lang = 'en-US'
     if (recognition.maxAlternatives !== undefined) {
       recognition.maxAlternatives = 1
+    }
+
+    recognition.onstart = () => {
+      console.log('🎙️ Speech recognition started')
+      setIsRecording(true)
+      setError(null)
     }
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -65,130 +87,86 @@ export function useVoiceRecorder() {
       let final = ''
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i]
-        const transcriptText = result[0].transcript
+        const transcriptText = event.results[i][0].transcript
         
-        if (result.isFinal) {
+        if (event.results[i].isFinal) {
           final += transcriptText + ' '
+          console.log('📝 Final transcript:', transcriptText)
         } else {
           interim += transcriptText
         }
       }
 
-      if (final) {
-        setTranscript((prev) => {
-          const newTranscript = prev + final
-          return newTranscript.trim()
-        })
+      if (interim) {
+        setInterimTranscript(interim)
       }
-      setInterimTranscript(interim)
+      
+      if (final) {
+        setTranscript(prev => {
+          const newTranscript = (prev + ' ' + final).trim()
+          console.log('📄 Full transcript:', newTranscript)
+          return newTranscript
+        })
+        setInterimTranscript('')
+      }
     }
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error, event.message)
+      console.error('❌ Speech recognition error:', event.error, event.message)
       
-      // Don't stop on 'no-speech' error, just continue
-      if (event.error === 'no-speech') {
-        console.log('No speech detected, continuing...')
-        return // Don't stop recording
-      }
-      
-      // Handle specific errors
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setError('Microphone access denied. Please allow microphone permissions in your browser settings.')
+        setError('Microphone permission denied. Please allow microphone in browser settings.')
+        setIsRecording(false)
+      } else if (event.error === 'no-speech') {
+        setError('No speech detected. Please speak louder or check your microphone.')
         setIsRecording(false)
       } else if (event.error === 'network') {
         setError('Network error. Please check your internet connection.')
         setIsRecording(false)
       } else if (event.error === 'aborted') {
-        // User stopped recording, this is normal
         console.log('Recording aborted by user')
+        // Don't show error for user-initiated stop
       } else {
-        setError(`Speech recognition error: ${event.error}`)
+        setError(`Recognition error: ${event.error}`)
         setIsRecording(false)
       }
     }
 
     recognition.onend = () => {
-      console.log('Speech recognition ended')
-      // If we're still supposed to be recording, restart it
-      if (isRecording) {
-        console.log('Restarting recognition...')
-        try {
-          recognition.start()
-        } catch (err) {
-          console.error('Failed to restart recognition:', err)
-          setIsRecording(false)
-        }
-      } else {
-        setIsRecording(false)
-        setInterimTranscript('')
-      }
-    }
-
-    if (recognition.onstart !== undefined) {
-      recognition.onstart = () => {
-        console.log('Speech recognition started')
-        setIsRecording(true)
-      }
+      console.log('🎙️ Speech recognition ended')
+      setIsRecording(false)
+      setInterimTranscript('')
     }
 
     recognitionRef.current = recognition
 
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort()
-        } catch (err) {
-          console.error('Error aborting recognition:', err)
-        }
-      }
-    }
-  }, [isRecording]) // Add isRecording as dependency
-
-  const startRecording = async () => {
-    if (!recognitionRef.current || !isSupported) {
-      setError('Speech recognition not available')
-      return
-    }
-    
     try {
-      setError(null)
-      setInterimTranscript('')
-      
-      // Request microphone permission explicitly (important for mobile)
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true })
-      } catch (permError) {
-        setError('Microphone permission denied. Please allow microphone access.')
-        return
-      }
-      
-      recognitionRef.current.start()
-      console.log('Recording started')
+      recognition.start()
+      console.log('🎤 Starting recognition...')
     } catch (err: any) {
-      console.error('Start recording error:', err)
-      
-      // Handle "already started" error
+      console.error('Failed to start recognition:', err)
       if (err.message && err.message.includes('already started')) {
         console.log('Recognition already running')
         setIsRecording(true)
       } else {
         setError('Failed to start recording. Please try again.')
+        setIsRecording(false)
       }
     }
-  }
+  }, [])
 
-  const stopRecording = () => {
-    if (!recognitionRef.current) return
-    
-    try {
-      recognitionRef.current.stop()
-      console.log('Recording stopped')
-    } catch (err) {
-      console.error('Stop recording error:', err)
+  const stopRecording = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+        console.log('⏹️ Stopping recognition...')
+      } catch (err) {
+        console.warn('Error stopping recognition:', err)
+      }
+      recognitionRef.current = null
     }
-  }
+    setIsRecording(false)
+  }, [])
 
   const resetTranscript = () => {
     setTranscript('')

@@ -139,13 +139,26 @@ const FACES: Record<AiModeId, {
   },
 }
 
+// Defensive face getter with fallback
+const getFace = (modeId: AiModeId) => {
+  const face = FACES[modeId]
+  if (!face) {
+    console.warn('No face found for modeId:', modeId, '— using therapist fallback')
+    return FACES['therapist']
+  }
+  return face
+}
+
 function AvatarFace({
   modeId, isSpeaking, isListening, mood, size = 200
 }: AvatarFaceProps) {
-  const face = FACES[modeId]
+  const face = getFace(modeId)
   const [blinkState, setBlinkState] = useState(1) // 1=open, 0=closed
   const [mouthOpen, setMouthOpen] = useState(0)   // 0=closed, 0.5=medium, 1=wide
   const blinkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  
+  // Debug log
+  console.log('AvatarFace rendering:', { modeId, face: !!face, leftEye: face?.leftEye })
 
   // ── BLINK LOOP ──
   useEffect(() => {
@@ -175,6 +188,9 @@ function AvatarFace({
   const brows = isListening ? face.browsRaised :
     (mood === 'angry' || mood === 'anxious') ? face.browsAngry :
     face.browsNeutral
+  
+  // Safe brows with null check
+  const safeBrows = brows && brows[0] && brows[1] ? brows : face.browsNeutral
 
   const mouthOpenAmount = mouthOpen * 18  // max px open
   const mouthSmile = (!isSpeaking && (mood === 'happy' || mood === 'excited')) ? 8 :
@@ -188,7 +204,13 @@ function AvatarFace({
       width={size}
       height={size}
       viewBox="0 0 200 200"
-      style={{ overflow: 'visible', filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.25))' }}
+      xmlns="http://www.w3.org/2000/svg"
+      overflow="visible"
+      style={{ 
+        overflow: 'visible', 
+        filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.3))',
+        display: 'block'
+      }}
     >
       <defs>
         <radialGradient id={gradId} cx="50%" cy="40%" r="60%">
@@ -206,7 +228,9 @@ function AvatarFace({
 
       {/* Background glow circle */}
       <motion.circle
-        cx={100} cy={100} r={95}
+        cx={Number(100) || 100} 
+        cy={Number(100) || 100} 
+        r={Number(95) || 95}
         fill={`url(#${gradId})`}
         animate={{ r: isSpeaking ? [95, 98, 95] : 95 }}
         transition={{ duration: 0.4, repeat: isSpeaking ? Infinity : 0 }}
@@ -229,8 +253,8 @@ function AvatarFace({
       {/* Blush cheeks */}
       {face.blush && (
         <>
-          <ellipse cx={62} cy={120} rx={14} ry={8} fill={face.blushColor} opacity={0.4} />
-          <ellipse cx={138} cy={120} rx={14} ry={8} fill={face.blushColor} opacity={0.4} />
+          <ellipse cx={Number(62) || 62} cy={Number(120) || 120} rx={Number(14) || 14} ry={Number(8) || 8} fill={face.blushColor} opacity={0.4} />
+          <ellipse cx={Number(138) || 138} cy={Number(120) || 120} rx={Number(14) || 14} ry={Number(8) || 8} fill={face.blushColor} opacity={0.4} />
         </>
       )}
 
@@ -248,83 +272,109 @@ function AvatarFace({
 
       {/* Left eye white */}
       <motion.ellipse
-        cx={face.leftEye.cx} cy={face.leftEye.cy}
-        rx={face.leftEye.rx}
-        ry={face.leftEye.ry}
+        cx={Number(face.leftEye.cx) || 78} 
+        cy={Number(face.leftEye.cy) || 90}
+        rx={Number(face.leftEye.rx) || 11}
+        ry={Number(face.leftEye.ry) || 13}
         fill="white"
         stroke={face.faceStroke}
         strokeWidth="1"
-        animate={{ ry: blinkState === 0 ? 1 : face.leftEye.ry }}
+        animate={{ ry: blinkState === 0 ? 1 : (Number(face.leftEye.ry) || 13) }}
         transition={{ duration: 0.06 }}
       />
 
       {/* Left pupil */}
       <motion.circle
-        cx={face.leftEye.cx + (isListening ? -1 : 0)}
-        cy={face.leftEye.cy + (mood === 'sad' ? 2 : 0)}
-        r={face.pupilSize}
+        cx={Number(face.leftEye.cx) + (isListening ? -1 : 0) || 78}
+        cy={Number(face.leftEye.cy) + (mood === 'sad' ? 2 : 0) || 90}
+        r={Number(face.pupilSize) || 6}
         fill={face.eyeColor}
         animate={{
-          r: blinkState === 0 ? 0 : face.pupilSize,
-          cy: face.leftEye.cy + (mood === 'sad' ? 2 : 0),
+          r: blinkState === 0 ? 0 : (Number(face.pupilSize) || 6),
+          cy: (Number(face.leftEye.cy) || 90) + (mood === 'sad' ? 2 : 0),
         }}
         transition={{ duration: 0.06 }}
       />
 
       {/* Left eye shine */}
       <motion.circle
-        cx={face.leftEye.cx - 3} cy={face.leftEye.cy - 3}
-        r={2} fill="white" opacity={0.9}
+        cx={Number(face.leftEye.cx) - 3 || 75} 
+        cy={Number(face.leftEye.cy) - 3 || 87}
+        r={Number(2) || 2} 
+        fill="white" 
+        opacity={0.9}
         animate={{ opacity: blinkState === 0 ? 0 : 0.9 }}
         transition={{ duration: 0.06 }}
       />
 
       {/* Right eye white */}
       <motion.ellipse
-        cx={face.rightEye.cx} cy={face.rightEye.cy}
-        rx={face.rightEye.rx}
-        ry={face.rightEye.ry}
+        cx={Number(face.rightEye.cx) || 122} 
+        cy={Number(face.rightEye.cy) || 90}
+        rx={Number(face.rightEye.rx) || 11}
+        ry={Number(face.rightEye.ry) || 13}
         fill="white"
         stroke={face.faceStroke}
         strokeWidth="1"
-        animate={{ ry: blinkState === 0 ? 1 : face.rightEye.ry }}
+        animate={{ ry: blinkState === 0 ? 1 : (Number(face.rightEye.ry) || 13) }}
         transition={{ duration: 0.06 }}
       />
 
       {/* Right pupil */}
       <motion.circle
-        cx={face.rightEye.cx + (isListening ? 1 : 0)}
-        cy={face.rightEye.cy + (mood === 'sad' ? 2 : 0)}
-        r={face.pupilSize}
+        cx={Number(face.rightEye.cx) + (isListening ? 1 : 0) || 122}
+        cy={Number(face.rightEye.cy) + (mood === 'sad' ? 2 : 0) || 90}
+        r={Number(face.pupilSize) || 6}
         fill={face.eyeColor}
         animate={{
-          r: blinkState === 0 ? 0 : face.pupilSize,
-          cy: face.rightEye.cy + (mood === 'sad' ? 2 : 0),
+          r: blinkState === 0 ? 0 : (Number(face.pupilSize) || 6),
+          cy: (Number(face.rightEye.cy) || 90) + (mood === 'sad' ? 2 : 0),
         }}
         transition={{ duration: 0.06 }}
       />
 
       {/* Right eye shine */}
       <motion.circle
-        cx={face.rightEye.cx - 3} cy={face.rightEye.cy - 3}
-        r={2} fill="white" opacity={0.9}
+        cx={Number(face.rightEye.cx) - 3 || 119} 
+        cy={Number(face.rightEye.cy) - 3 || 87}
+        r={Number(2) || 2} 
+        fill="white" 
+        opacity={0.9}
         animate={{ opacity: blinkState === 0 ? 0 : 0.9 }}
         transition={{ duration: 0.06 }}
       />
 
       {/* Eyebrows */}
       <motion.line
-        x1={brows[0][0]} y1={brows[0][1]}
-        x2={brows[0][2]} y2={brows[0][3]}
-        stroke={face.eyeColor} strokeWidth="3.5" strokeLinecap="round"
-        animate={{ x1: brows[0][0], y1: brows[0][1], x2: brows[0][2], y2: brows[0][3] }}
+        x1={Number(safeBrows[0][0]) || 62} 
+        y1={Number(safeBrows[0][1]) || 75}
+        x2={Number(safeBrows[0][2]) || 90} 
+        y2={Number(safeBrows[0][3]) || 73}
+        stroke={face.eyeColor} 
+        strokeWidth="3.5" 
+        strokeLinecap="round"
+        animate={{ 
+          x1: Number(safeBrows[0][0]) || 62, 
+          y1: Number(safeBrows[0][1]) || 75, 
+          x2: Number(safeBrows[0][2]) || 90, 
+          y2: Number(safeBrows[0][3]) || 73 
+        }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
       />
       <motion.line
-        x1={brows[1][0]} y1={brows[1][1]}
-        x2={brows[1][2]} y2={brows[1][3]}
-        stroke={face.eyeColor} strokeWidth="3.5" strokeLinecap="round"
-        animate={{ x1: brows[1][0], y1: brows[1][1], x2: brows[1][2], y2: brows[1][3] }}
+        x1={Number(safeBrows[1][0]) || 110} 
+        y1={Number(safeBrows[1][1]) || 73}
+        x2={Number(safeBrows[1][2]) || 138} 
+        y2={Number(safeBrows[1][3]) || 75}
+        stroke={face.eyeColor} 
+        strokeWidth="3.5" 
+        strokeLinecap="round"
+        animate={{ 
+          x1: Number(safeBrows[1][0]) || 110, 
+          y1: Number(safeBrows[1][1]) || 73, 
+          x2: Number(safeBrows[1][2]) || 138, 
+          y2: Number(safeBrows[1][3]) || 75 
+        }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
       />
 
@@ -396,9 +446,9 @@ function AvatarFace({
           {[1, 2].map(i => (
             <motion.circle
               key={i}
-              cx={face.leftEye.cx - 25}
-              cy={face.mouthCy - 10}
-              r={i * 8}
+              cx={Number(face.leftEye.cx) - 25 || 53}
+              cy={Number(face.mouthCy) - 10 || 125}
+              r={Number(i * 8) || 8}
               fill="none"
               stroke="#4ECDC4"
               strokeWidth="1.5"

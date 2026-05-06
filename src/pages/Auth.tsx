@@ -24,6 +24,7 @@ export function Auth() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   if (session) {
     return <Navigate to="/journal" replace />
@@ -32,28 +33,37 @@ export function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccessMessage('')
     setLoading(true)
 
     try {
       if (mode === 'signin') {
         await signIn(email, password)
+        // Will redirect automatically via auth state change
       } else {
-        await signUp(email, password, username)
+        const result: any = await signUp(email, password, username)
+        
+        if (result.requiresConfirmation) {
+          setSuccessMessage('Account created! Check your email (including spam) for a confirmation link.')
+          setLoading(false)
+        } else {
+          // Auto-confirmed, will redirect via auth state change
+        }
       }
     } catch (err: any) {
       const errorMsg = err.message || 'Authentication failed. Please try again.'
       
       // Provide helpful error messages
       if (errorMsg.includes('Database error') || errorMsg.includes('relation') || errorMsg.includes('does not exist')) {
-        setError('Database setup incomplete. Please run the migration in Supabase dashboard. See FIX_DATABASE_ERROR.md for instructions.')
+        setError('Database setup incomplete. Please run the migration in Supabase dashboard.')
       } else if (errorMsg.includes('User already registered')) {
         setError('This email is already registered. Try signing in instead.')
+        setMode('signin')
       } else if (errorMsg.includes('Invalid API key') || errorMsg.includes('JWT')) {
-        setError('Authentication configuration error. Please check your Supabase API key in .env.local')
+        setError('Authentication configuration error. Please check your Supabase API key.')
       } else {
         setError(errorMsg)
       }
-    } finally {
       setLoading(false)
     }
   }
@@ -336,6 +346,29 @@ export function Auth() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
+            {/* Success Message */}
+            <AnimatePresence>
+              {successMessage && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    padding: 12,
+                    background: 'rgba(34, 197, 94, 0.1)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    borderRadius: 12,
+                    color: '#22c55e',
+                    fontSize: 13,
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  {successMessage}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Error Message */}
             <AnimatePresence>

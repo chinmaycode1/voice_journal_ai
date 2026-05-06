@@ -42,6 +42,33 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
   const [micPermissionGranted, setMicPermissionGranted] = useState(false)
   
   const wasRecordingRef = useRef(false)
+  const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Safety: cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current)
+      }
+      stopRecording()
+    }
+  }, [stopRecording])
+
+  // Safety timeout: auto-stop after 60 seconds
+  useEffect(() => {
+    if (isRecording) {
+      recordingTimeoutRef.current = setTimeout(() => {
+        console.log('⏱️ Recording timeout - auto-stopping')
+        stopRecording()
+        showError('Recording stopped automatically after 60 seconds.')
+      }, 60000)
+    } else {
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current)
+        recordingTimeoutRef.current = null
+      }
+    }
+  }, [isRecording, stopRecording, showError])
 
   // Notify parent of state changes
   useEffect(() => {
