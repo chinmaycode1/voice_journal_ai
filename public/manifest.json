@@ -1,16 +1,24 @@
 {
-  "name": "VoiceJournal",
+  "name": "VoiceJournal - AI Voice Journaling",
   "short_name": "VoiceJournal",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#09090F",
   "theme_color": "#7C6FFF",
-  "description": "Your AI voice journaling companion",
+  "description": "Your AI voice journaling companion. Speak your thoughts, get AI responses, and track your mood.",
+  "categories": ["productivity", "health", "lifestyle"],
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [],
+  "permissions": [
+    "microphone"
+  ],
+  "prefer_related_applications": false
 }

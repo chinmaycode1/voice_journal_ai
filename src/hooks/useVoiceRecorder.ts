@@ -41,8 +41,12 @@ export function useVoiceRecorder() {
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   const startRecording = useCallback(async () => {
-    // Check HTTPS requirement
-    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+    // Check HTTPS requirement (more lenient for development)
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname.includes('192.168')
+    
+    if (window.location.protocol !== 'https:' && !isLocalhost) {
       setError('Voice recording requires HTTPS. Please use the deployed version.')
       return
     }
@@ -56,20 +60,47 @@ export function useVoiceRecorder() {
       return
     }
 
-    // Request microphone permission FIRST
+    // Check if mediaDevices is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError('Microphone access not available. Please use HTTPS and a supported browser.')
+      return
+    }
+
+    // Request microphone permission FIRST - CRITICAL for mobile
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      stream.getTracks().forEach(track => track.stop()) // immediately stop, we just needed permission
+      console.log('🎤 Requesting microphone permission...')
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      })
+      
+      // Stop all tracks immediately (we just needed permission)
+      stream.getTracks().forEach(track => track.stop())
       console.log('✅ Microphone permission granted')
+      
+      // Small delay to ensure permission is fully granted (helps on iOS)
+      await new Promise(resolve => setTimeout(resolve, 100))
     } catch (err: any) {
-      console.error('Microphone permission error:', err)
-      setError('Microphone access denied. Please allow microphone in browser settings and reload.')
+      console.error('❌ Microphone permission error:', err)
+      
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError('Microphone access denied. Please allow microphone in your browser settings.')
+      } else if (err.name === 'NotFoundError') {
+        setError('No microphone found. Please connect a microphone.')
+      } else if (err.name === 'NotReadableError') {
+        setError('Microphone is being used by another app. Please close other apps and try again.')
+      } else {
+        setError(`Microphone error: ${err.message || 'Unknown error'}`)
+      }
       return
     }
 
     // Create FRESH recognition instance
     const recognition = new SpeechRecognition()
-    recognition.continuous = false  // Changed back to false for better control
+    recognition.continuous = true  // Keep continuous for better mobile experience
     recognition.interimResults = true
     recognition.lang = 'en-US'
     if (recognition.maxAlternatives !== undefined) {
@@ -115,19 +146,23 @@ export function useVoiceRecorder() {
       console.error('❌ Speech recognition error:', event.error, event.message)
       
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setError('Microphone permission denied. Please allow microphone in browser settings.')
+        setError('Microphone permission denied. Please go to your browser settings and allow microphone access for this site, then reload the page.')
         setIsRecording(false)
       } else if (event.error === 'no-speech') {
-        setError('No speech detected. Please speak louder or check your microphone.')
+        // Don't show error for no-speech in continuous mode, just keep listening
+        console.log('⚠️ No speech detected, continuing...')
+        // Don't set error or stop recording
+      } else if (event.error === 'audio-capture') {
+        setError('Microphone not accessible. Please check if another app is using it.')
         setIsRecording(false)
       } else if (event.error === 'network') {
-        setError('Network error. Please check your internet connection.')
+        setError('Network error. Please check your internet connection and try again.')
         setIsRecording(false)
       } else if (event.error === 'aborted') {
-        console.log('Recording aborted by user')
+        console.log('🛑 Recording aborted by user')
         // Don't show error for user-initiated stop
       } else {
-        setError(`Recognition error: ${event.error}`)
+        setError(`Recognition error: ${event.error}. Please try again.`)
         setIsRecording(false)
       }
     }

@@ -94,10 +94,10 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
   useEffect(() => {
     // Detect when recording just stopped
     if (wasRecordingRef.current && !isRecording) {
+      const finalTranscript = transcript.trim()
+      
       // Wait a bit for transcript to finalize
-      setTimeout(() => {
-        const finalTranscript = transcript.trim()
-        
+      const timeoutId = setTimeout(() => {
         if (finalTranscript) {
           callGroq(finalTranscript, selectedMode).catch((error) => {
             console.error('Groq API error:', error)
@@ -107,6 +107,9 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
           showError('No speech detected. Please try again.')
         }
       }, 1500)
+      
+      // Cleanup timeout on unmount or if recording starts again
+      return () => clearTimeout(timeoutId)
     }
     
     // Update ref for next render

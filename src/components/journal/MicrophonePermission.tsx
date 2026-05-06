@@ -11,20 +11,16 @@ export function MicrophonePermission({ onPermissionGranted }: MicrophonePermissi
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking')
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    checkPermission()
-  }, [])
-
   const checkPermission = async () => {
     try {
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setError('Your browser does not support microphone access')
+        setError('Your browser does not support microphone access. Please use Chrome, Edge, or Safari.')
         setPermissionState('denied')
         return
       }
 
-      // Try to query permission state
+      // Try to query permission state (not supported on all browsers)
       if (navigator.permissions && navigator.permissions.query) {
         try {
           const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
@@ -41,42 +37,78 @@ export function MicrophonePermission({ onPermissionGranted }: MicrophonePermissi
               onPermissionGranted()
             }
           }
-        } catch (err) {
-          // Permission query not supported, try direct access
+        } catch {
+          // Permission query not supported (common on iOS Safari)
+          console.log('Permission query not supported, will prompt on request')
           setPermissionState('prompt')
         }
       } else {
+        // Permissions API not available (iOS Safari)
         setPermissionState('prompt')
       }
-    } catch (err) {
-      console.error('Permission check error:', err)
+    } catch {
+      console.error('Permission check error')
       setPermissionState('prompt')
     }
   }
 
+  useEffect(() => {
+    checkPermission()
+  }, [])
+
   const requestPermission = async () => {
     setError(null)
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      console.log('🎤 Requesting microphone permission...')
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      })
+      
+      console.log('✅ Microphone stream obtained')
       
       // Stop all tracks immediately (we just needed permission)
-      stream.getTracks().forEach(track => track.stop())
+      stream.getTracks().forEach(track => {
+        track.stop()
+        console.log('🛑 Track stopped:', track.label)
+      })
       
       setPermissionState('granted')
       if (onPermissionGranted) {
         onPermissionGranted()
       }
-    } catch (err: any) {
-      console.error('Microphone permission error:', err)
+    } catch (err) {
+      console.error('❌ Microphone permission error:', err)
+      const error = err as Error
       
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setError('Microphone access denied. Please allow microphone permissions in your browser settings.')
         setPermissionState('denied')
-      } else if (err.name === 'NotFoundError') {
+      } else if (error.name === 'NotFoundError') {
         setError('No microphone found. Please connect a microphone and try again.')
         setPermissionState('denied')
+      } else if (error.name === 'NotReadableError') {
+        setError('Microphone is being used by another app. Please close other apps and try again.')
+        setPermissionState('denied')
+      } else if (error.name === 'OverconstrainedError') {
+        setError('Microphone constraints not supported. Trying basic access...')
+        // Retry with basic constraints
+        try {
+          const basicStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          basicStream.getTracks().forEach(track => track.stop())
+          setPermissionState('granted')
+          if (onPermissionGranted) {
+            onPermissionGranted()
+          }
+        } catch {
+          setError('Failed to access microphone. Please try again.')
+          setPermissionState('denied')
+        }
       } else {
-        setError('Failed to access microphone. Please try again.')
+        setError(`Failed to access microphone: ${error.message || 'Unknown error'}. Please try again.`)
         setPermissionState('denied')
       }
     }
@@ -151,13 +183,35 @@ export function MicrophonePermission({ onPermissionGranted }: MicrophonePermissi
       </div>
 
       {/* Instructions for mobile */}
-      <details className="text-xs text-text-muted">
-        <summary className="cursor-pointer hover:text-text">
-          How to enable microphone on mobile
+      <details className="text-xs text-text-muted border-t border-white/10 pt-3">
+        <summary className="cursor-pointer hover:text-text font-medium">
+          📱 How to enable microphone on mobile
         </summary>
-        <div className="mt-2 space-y-2 pl-4">
-          <p><strong>iOS (Safari):</strong> Settings → Safari → Microphone → Allow</p>
-          <p><strong>Android (Chrome):</strong> Settings → Site Settings → Microphone → Allow</p>
+        <div className="mt-3 space-y-3 pl-2">
+          <div>
+            <p className="font-semibold text-text mb-1">🍎 iOS (Safari):</p>
+            <ol className="list-decimal list-inside space-y-1 text-text-muted">
+              <li>Open <strong>Settings</strong> app</li>
+              <li>Scroll down to <strong>Safari</strong></li>
+              <li>Tap <strong>Microphone</strong></li>
+              <li>Select <strong>Ask</strong> or <strong>Allow</strong></li>
+              <li>Reload this page</li>
+            </ol>
+          </div>
+          <div>
+            <p className="font-semibold text-text mb-1">🤖 Android (Chrome):</p>
+            <ol className="list-decimal list-inside space-y-1 text-text-muted">
+              <li>Tap the <strong>lock icon</strong> in address bar</li>
+              <li>Tap <strong>Permissions</strong></li>
+              <li>Enable <strong>Microphone</strong></li>
+              <li>Reload this page</li>
+            </ol>
+          </div>
+          <div className="bg-accent/10 border border-accent/30 rounded p-2 mt-2">
+            <p className="text-xs text-accent">
+              💡 <strong>Tip:</strong> Make sure you're using HTTPS (secure connection) and have a stable internet connection.
+            </p>
+          </div>
         </div>
       </details>
     </motion.div>

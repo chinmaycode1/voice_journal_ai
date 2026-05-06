@@ -211,4 +211,25 @@ h1, h2, h3, h4, h5, h6 {
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
   }
+  
+  .safe-area-bottom {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Dark glass effect */
+.dark-glass {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure buttons are accessible on mobile */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: rgba(124, 111, 255, 0.2);
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on buttons */
+button, .btn-gradient {
+  -webkit-user-select: none;
+  user-select: none;
 }
