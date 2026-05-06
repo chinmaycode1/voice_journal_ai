@@ -53,10 +53,12 @@ export function useVoiceRecorder() {
     const recognition = new SpeechRecognition()
     
     // Mobile-optimized settings
-    recognition.continuous = true  // Changed to true for better mobile support
-    recognition.interimResults = true
+    recognition.continuous = true  // Keep listening
+    recognition.interimResults = true  // Show interim results
     recognition.lang = 'en-US'
-    recognition.maxAlternatives = 1
+    if (recognition.maxAlternatives !== undefined) {
+      recognition.maxAlternatives = 1
+    }
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = ''
@@ -85,29 +87,50 @@ export function useVoiceRecorder() {
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error, event.message)
       
+      // Don't stop on 'no-speech' error, just continue
+      if (event.error === 'no-speech') {
+        console.log('No speech detected, continuing...')
+        return // Don't stop recording
+      }
+      
       // Handle specific errors
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         setError('Microphone access denied. Please allow microphone permissions in your browser settings.')
-      } else if (event.error === 'no-speech') {
-        setError('No speech detected. Please try again.')
+        setIsRecording(false)
       } else if (event.error === 'network') {
         setError('Network error. Please check your internet connection.')
+        setIsRecording(false)
+      } else if (event.error === 'aborted') {
+        // User stopped recording, this is normal
+        console.log('Recording aborted by user')
       } else {
         setError(`Speech recognition error: ${event.error}`)
+        setIsRecording(false)
       }
-      
-      setIsRecording(false)
     }
 
     recognition.onend = () => {
       console.log('Speech recognition ended')
-      setIsRecording(false)
-      setInterimTranscript('')
+      // If we're still supposed to be recording, restart it
+      if (isRecording) {
+        console.log('Restarting recognition...')
+        try {
+          recognition.start()
+        } catch (err) {
+          console.error('Failed to restart recognition:', err)
+          setIsRecording(false)
+        }
+      } else {
+        setIsRecording(false)
+        setInterimTranscript('')
+      }
     }
 
-    recognition.onstart = () => {
-      console.log('Speech recognition started')
-      setIsRecording(true)
+    if (recognition.onstart !== undefined) {
+      recognition.onstart = () => {
+        console.log('Speech recognition started')
+        setIsRecording(true)
+      }
     }
 
     recognitionRef.current = recognition
@@ -121,7 +144,7 @@ export function useVoiceRecorder() {
         }
       }
     }
-  }, [])
+  }, [isRecording]) // Add isRecording as dependency
 
   const startRecording = async () => {
     if (!recognitionRef.current || !isSupported) {
