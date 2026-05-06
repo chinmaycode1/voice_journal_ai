@@ -14,12 +14,14 @@ interface SpeechRecognition extends EventTarget {
   continuous: boolean
   interimResults: boolean
   lang: string
+  maxAlternatives?: number
   start: () => void
   stop: () => void
   abort: () => void
   onresult: ((event: SpeechRecognitionEvent) => void) | null
   onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
   onend: (() => void) | null
+  onstart?: (() => void) | null
 }
 
 declare global {
@@ -39,6 +41,7 @@ export function useVoiceRecorder() {
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   useEffect(() => {
+    // Check for speech recognition support (works on Chrome, Edge, Safari)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     
     if (!SpeechRecognition) {
@@ -48,9 +51,12 @@ export function useVoiceRecorder() {
     }
 
     const recognition = new SpeechRecognition()
-    recognition.continuous = false
+    
+    // Mobile-optimized settings
+    recognition.continuous = true  // Changed to true for better mobile support
     recognition.interimResults = true
     recognition.lang = 'en-US'
+    recognition.maxAlternatives = 1
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = ''
@@ -58,49 +64,95 @@ export function useVoiceRecorder() {
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
+        const transcriptText = result[0].transcript
+        
         if (result.isFinal) {
-          final += result[0].transcript
+          final += transcriptText + ' '
         } else {
-          interim += result[0].transcript
+          interim += transcriptText
         }
       }
 
       if (final) {
-        setTranscript((prev) => prev + ' ' + final)
+        setTranscript((prev) => {
+          const newTranscript = prev + final
+          return newTranscript.trim()
+        })
       }
       setInterimTranscript(interim)
     }
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      setError(`Speech recognition error: ${event.error}`)
+      console.error('Speech recognition error:', event.error, event.message)
+      
+      // Handle specific errors
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setError('Microphone access denied. Please allow microphone permissions in your browser settings.')
+      } else if (event.error === 'no-speech') {
+        setError('No speech detected. Please try again.')
+      } else if (event.error === 'network') {
+        setError('Network error. Please check your internet connection.')
+      } else {
+        setError(`Speech recognition error: ${event.error}`)
+      }
+      
       setIsRecording(false)
     }
 
     recognition.onend = () => {
+      console.log('Speech recognition ended')
       setIsRecording(false)
       setInterimTranscript('')
+    }
+
+    recognition.onstart = () => {
+      console.log('Speech recognition started')
+      setIsRecording(true)
     }
 
     recognitionRef.current = recognition
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.abort()
+        try {
+          recognitionRef.current.abort()
+        } catch (err) {
+          console.error('Error aborting recognition:', err)
+        }
       }
     }
   }, [])
 
-  const startRecording = () => {
-    if (!recognitionRef.current || !isSupported) return
+  const startRecording = async () => {
+    if (!recognitionRef.current || !isSupported) {
+      setError('Speech recognition not available')
+      return
+    }
     
     try {
       setError(null)
       setInterimTranscript('')
+      
+      // Request microphone permission explicitly (important for mobile)
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+      } catch (permError) {
+        setError('Microphone permission denied. Please allow microphone access.')
+        return
+      }
+      
       recognitionRef.current.start()
-      setIsRecording(true)
-    } catch (err) {
-      setError('Failed to start recording. Please try again.')
-      console.error(err)
+      console.log('Recording started')
+    } catch (err: any) {
+      console.error('Start recording error:', err)
+      
+      // Handle "already started" error
+      if (err.message && err.message.includes('already started')) {
+        console.log('Recognition already running')
+        setIsRecording(true)
+      } else {
+        setError('Failed to start recording. Please try again.')
+      }
     }
   }
 
@@ -109,8 +161,9 @@ export function useVoiceRecorder() {
     
     try {
       recognitionRef.current.stop()
+      console.log('Recording stopped')
     } catch (err) {
-      console.error(err)
+      console.error('Stop recording error:', err)
     }
   }
 

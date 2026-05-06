@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, Square, Loader2, Bookmark, Check } from 'lucide-react'
+import { Mic, Square, Loader2, Bookmark, Check, AlertCircle } from 'lucide-react'
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder'
 import { useGroqAI } from '../../hooks/useGroqAI'
 import { useSpeechSynth } from '../../hooks/useSpeechSynth'
@@ -12,6 +12,7 @@ import { WaveformCanvas } from './WaveformCanvas'
 import { AiResponse } from './AiResponse'
 import { MoodBadge } from './MoodBadge'
 import { TtsControls } from './TtsControls'
+import { MicrophonePermission } from './MicrophonePermission'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { AI_MODES } from '../../lib/aiModes'
@@ -28,7 +29,7 @@ interface VoiceRecorderProps {
 export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange }: VoiceRecorderProps) {
   const { user } = useAuthStore()
   const { activeMode, setCurrentMood, setShowLevelUp } = useJournalStore()
-  const { isRecording, transcript, interimTranscript, startRecording, stopRecording, resetTranscript, error: recorderError } = useVoiceRecorder()
+  const { isRecording, transcript, interimTranscript, startRecording, stopRecording, resetTranscript, error: recorderError, isSupported } = useVoiceRecorder()
   const { callGroq, aiResponse, detectedMood, loading: aiLoading, error: aiError } = useGroqAI()
   const { speak, stop, isSpeaking } = useSpeechSynth()
   const { updateStreak } = useMoodStreak()
@@ -38,6 +39,7 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
   const [rate, setRate] = useState(1.0)
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [micPermissionGranted, setMicPermissionGranted] = useState(false)
   
   const wasRecordingRef = useRef(false)
 
@@ -162,6 +164,34 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
     if (aiResponse) {
       speak(aiResponse, pitch, rate)
     }
+  }
+
+  // Show microphone permission UI if not granted
+  if (!isSupported) {
+    return (
+      <div className="glass p-6 border-l-4 border-red-500">
+        <div className="flex items-start gap-3">
+          <AlertCircle size={24} className="text-red-500 flex-shrink-0" />
+          <div>
+            <h3 className="font-heading text-lg font-bold text-text mb-1">
+              Speech Recognition Not Supported
+            </h3>
+            <p className="text-sm text-text-muted">
+              Your browser doesn't support speech recognition. Please use:
+            </p>
+            <ul className="text-sm text-text-muted mt-2 space-y-1 list-disc list-inside">
+              <li>Chrome (Desktop & Mobile)</li>
+              <li>Edge (Desktop & Mobile)</li>
+              <li>Safari (iOS 14.5+)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!micPermissionGranted) {
+    return <MicrophonePermission onPermissionGranted={() => setMicPermissionGranted(true)} />
   }
 
   return (
