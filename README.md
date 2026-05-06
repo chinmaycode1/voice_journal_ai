@@ -127,12 +127,38 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## 🐛 Troubleshooting
 
-### Voice Recording Not Working
+### Voice Recording Not Working on Mobile
+
+#### iOS (Safari):
+1. Go to **Settings** → **Safari**
+2. Scroll to **Microphone**
+3. Select **Ask** or **Allow**
+4. **Force close Safari** (swipe up from app switcher)
+5. Reopen Safari and visit the site
+6. Reload the page (pull down to refresh)
+
+#### Android (Chrome):
+1. Tap the **lock icon** in the address bar
+2. Tap **Permissions**
+3. Enable **Microphone**
+4. Reload the page
+
+#### General Troubleshooting:
+1. **Check HTTPS**: URL must start with `https://`
+2. **Check Internet**: Need stable connection for speech recognition
+3. **Check Microphone**: Test in another app (voice recorder, etc.)
+4. **Clear Cache**: 
+   - iOS: Settings → Safari → Clear History and Website Data
+   - Android: Chrome → Settings → Privacy → Clear browsing data
+5. **Update Browser**: Make sure you're on the latest version
+6. **Try Incognito/Private**: Sometimes helps with permission issues
+
+### Voice Recording Not Working on Desktop
 1. **Check Browser**: Use Chrome, Edge, or Safari (Firefox not supported)
 2. **Grant Permission**: Allow microphone access when prompted
 3. **Check HTTPS**: Voice recording only works on HTTPS
 4. **Test Microphone**: Ensure your microphone works in other apps
-5. **Check Console**: Look for error messages in browser console
+5. **Check Console**: Look for error messages in browser console (F12)
 
 ### Authentication Issues
 1. **Check Environment Variables**: Verify `.env.local` has correct Supabase credentials
@@ -151,30 +177,46 @@ rm -rf node_modules/.vite
 npm run build
 ```
 
-## 🎯 Key Improvements (Latest Updates)
+### PWA Installation Issues
+1. **Check HTTPS**: PWA only works on HTTPS
+2. **Check Manifest**: Ensure manifest.json is accessible
+3. **Check Service Worker**: Open DevTools → Application → Service Workers
+4. **Clear Cache**: Clear browser cache and reload
 
-### ✅ Voice Recording Fixed
-- Continuous recording mode enabled
-- Auto-restart on recognition end
-- Better error handling for mobile
-- Microphone permission UI added
+## 🎯 Key Improvements (Latest Updates - May 2026)
 
-### ✅ Fully Responsive
+### ✅ Mobile Voice Recording Fixed
+- **Fixed "service-not-allowed" error** on iOS and Android
+- Enhanced microphone permission handling with proper audio constraints
+- iOS Safari compatibility with permission delay
+- Better error messages with device-specific instructions
+- Continuous recording mode with auto-restart
+
+### ✅ PWA Support Added
+- Service worker for offline functionality
+- Installable on mobile home screen
+- App-like experience on mobile devices
+- Cached assets for faster loading
+
+### ✅ Fully Responsive & Mobile-Optimized
 - Mobile-first design (320px+)
 - Tablet optimized (768px+)
 - Desktop enhanced (1024px+)
-- Safe area support for notched devices
+- Safe area support for notched devices (iPhone X+)
+- Touch targets optimized (44px minimum)
+- Better mobile navigation
 
-### ✅ Zero Console Errors
-- All SVG attributes fixed
-- TypeScript errors resolved
-- Proper error handling throughout
+### ✅ Enhanced Security
+- Permissions-Policy headers for microphone access
+- Security headers in Vercel configuration
+- HTTPS enforced for all features
+- Proper CORS and CSP policies
 
-### ✅ Auth System Verified
-- Sign up/sign in working
-- Google OAuth configured
-- Profile creation automatic
-- Session management working
+### ✅ Code Quality
+- Zero TypeScript errors
+- Improved React hooks usage
+- Better error handling throughout
+- Optimized build size
 
 ## 📝 License
 
