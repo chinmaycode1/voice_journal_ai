@@ -6,7 +6,6 @@
 
 🚀 **Production**: [https://voicejournal-psi.vercel.app](https://voicejournal-psi.vercel.app)  
 📦 **GitHub**: [https://github.com/chinmaycode1/voice_journal_ai](https://github.com/chinmaycode1/voice_journal_ai)  
-🔧 **Local Dev**: http://localhost:5174/
 
 ## ✨ Features
 
@@ -53,41 +52,6 @@
 - **PDF Export**: jsPDF + html2canvas
 - **Celebrations**: canvas-confetti
 
-## 📁 Project Structure
-
-```
-voicejournal/
-├── public/
-│   ├── favicon.svg
-│   └── manifest.json
-├── src/
-│   ├── components/
-│   │   ├── ui/              # Reusable UI components
-│   │   ├── layout/          # Layout components
-│   │   ├── journal/         # Journal page components
-│   │   ├── stats/           # Stats page components
-│   │   ├── history/         # History page components
-│   │   └── auth/            # Auth page components
-│   ├── hooks/               # Custom React hooks
-│   ├── lib/                 # Utility functions & configs
-│   ├── pages/               # Page components
-│   ├── store/               # Zustand stores
-│   ├── types/               # TypeScript types
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── supabase/
-│   └── migrations/
-│       └── 001_init.sql     # Database schema
-├── .env.local               # Environment variables (gitignored)
-├── .gitignore
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-├── vite.config.ts
-└── vercel.json
-```
-
 ## 🚀 Setup Instructions
 
 ### Prerequisites
@@ -98,7 +62,7 @@ voicejournal/
 ### 1. Clone and Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/chinmaycode1/voice_journal_ai.git
 cd voicejournal
 npm install
 ```
@@ -141,108 +105,76 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 3. Add environment variables in Vercel dashboard
 4. Deploy!
 
-## 🎮 Usage
+## 📱 Browser Compatibility
 
-### First Time Setup
-1. Sign up with email or Google
-2. Complete onboarding (choose AI mode, try recording)
-3. Start journaling!
+### ✅ Supported Browsers:
 
-### Daily Journaling
-1. Click the record button (or press Space)
-2. Speak your thoughts
-3. Click stop when done
-4. AI responds based on your chosen mode
-5. Entry auto-saves with XP earned
+| Browser | Platform | Voice Recording | Status |
+|---------|----------|----------------|--------|
+| **Chrome** | Desktop | ✅ | Full Support |
+| **Chrome** | Android | ✅ | Full Support |
+| **Edge** | Desktop | ✅ | Full Support |
+| **Edge** | Android | ✅ | Full Support |
+| **Safari** | iOS 14.5+ | ✅ | Full Support |
+| **Safari** | macOS | ✅ | Full Support |
+| **Samsung Internet** | Android | ✅ | Full Support |
+| **Firefox** | All | ❌ | No Web Speech API |
 
-### Exploring Features
-- **Journal Page**: Record entries, switch AI modes, adjust TTS settings, interact with 3D avatar
-- **History Page**: Search, filter, and replay past entries
-- **Stats Page**: View mood trends, streaks, and analytics
-- **Settings Page**: Customize profile, preferences, export PDF
-
----
-
-## 🧑‍🎤 Avatar System - SVG Animated Faces
-
-The app features **5 unique animated SVG cartoon faces** - one for each AI personality!
-
-### ✨ Features:
-- ✅ **100% Offline** - No external dependencies or network requests
-- ✅ **Realistic Animations** - Blinking, lip-sync, mood expressions
-- ✅ **Unique Designs** - Each personality has distinct features:
-  - **Therapist** 🧘: Warm skin, blue eyes, glasses, blush cheeks
-  - **Hype Friend** 🔥: Tan skin, dark eyes, baseball cap
-  - **Philosopher** 🌌: Darker skin, beard & mustache
-  - **Roast Mode** 😈: Medium skin, squinting eyes, smirk
-  - **Poet** ✨: Pink-tinted skin, purple eyes, flowing hair
-
-### 🎬 Animations:
-- **Blinking**: Natural eye blinks every 2-5 seconds
-- **Lip-sync**: Procedural mouth movements when speaking
-- **Listening**: Eyebrows raise, ear waves appear
-- **Mood-based**: Facial expressions change with detected mood
-- **3D Flip**: Smooth card rotation when switching modes
-- **Sound Waves**: Animated waves beside mouth when speaking
-
-### 🎨 Customization:
-All avatar designs are in `src/components/avatar/AvatarFace.tsx`. You can customize:
-- Face shapes and colors
-- Eye styles and colors
-- Accessories (glasses, hats, beards, hair)
-- Animation timings
-- Mood expressions
-
----
-
-## 🎨 AI Modes
-
-1. **🧘 Therapist** - Gentle, empathetic, asks reflective questions
-2. **🔥 Hype Friend** - Energetic, encouraging, full Gen Z energy
-3. **🌌 Philosopher** - Finds deeper meaning in what you said
-4. **😈 Roast Mode** - Lovingly sarcastic, roasts you with care
-5. **✨ The Poet** - Responds in vivid imagery and lyrical prose
-
-## 📊 XP & Leveling System
-
-- **Base XP**: 10 XP per entry
-- **Word Bonus**: +2 XP per 10 words
-- **Levels**: 10 levels from Newcomer (Lv.1) to Transcendent (Lv.10)
-- **Thresholds**: 0, 50, 150, 300, 500, 750, 1050, 1400, 1850, 2500 XP
-
-## 🎯 Mood Types
-
-- 😊 Happy (score: 6)
-- ⚡ Excited (score: 5)
-- 🌊 Calm (score: 4)
-- 😐 Neutral (score: 3)
-- 😰 Anxious (score: 2)
-- 💙 Sad (score: 1)
-- 🔥 Angry (score: 0)
-
-## 🔒 Security
-
-- Row Level Security (RLS) enabled on all Supabase tables
-- Environment variables never exposed client-side
-- User data isolated per account
-- Secure authentication via Supabase Auth
+### 🎤 Voice Recording Requirements:
+- HTTPS connection (required for microphone access)
+- Microphone permission granted
+- Internet connection (speech recognition uses cloud API)
 
 ## 🐛 Troubleshooting
 
-### Speech Recognition Not Working
-- Use Chrome, Edge, or Safari (Firefox not supported)
-- Grant microphone permissions
-- Check browser console for errors
+### Voice Recording Not Working
+1. **Check Browser**: Use Chrome, Edge, or Safari (Firefox not supported)
+2. **Grant Permission**: Allow microphone access when prompted
+3. **Check HTTPS**: Voice recording only works on HTTPS
+4. **Test Microphone**: Ensure your microphone works in other apps
+5. **Check Console**: Look for error messages in browser console
 
-### AI Responses Failing
-- Verify Groq API key is correct
-- Check API quota/limits
-- Ensure internet connection
+### Authentication Issues
+1. **Check Environment Variables**: Verify `.env.local` has correct Supabase credentials
+2. **Run Migration**: Ensure database migration ran successfully in Supabase
+3. **Check RLS**: Verify Row Level Security policies are enabled
+4. **Clear Cache**: Try clearing browser cache and cookies
 
-### Supabase Errors
-- Verify environment variables
-- Check RLS policies are enabled
-- Ensure migration SQL ran successfully
+### Build Errors
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+
+# Clear Vite cache
+rm -rf node_modules/.vite
+npm run build
+```
+
+## 🎯 Key Improvements (Latest Updates)
+
+### ✅ Voice Recording Fixed
+- Continuous recording mode enabled
+- Auto-restart on recognition end
+- Better error handling for mobile
+- Microphone permission UI added
+
+### ✅ Fully Responsive
+- Mobile-first design (320px+)
+- Tablet optimized (768px+)
+- Desktop enhanced (1024px+)
+- Safe area support for notched devices
+
+### ✅ Zero Console Errors
+- All SVG attributes fixed
+- TypeScript errors resolved
+- Proper error handling throughout
+
+### ✅ Auth System Verified
+- Sign up/sign in working
+- Google OAuth configured
+- Profile creation automatic
+- Session management working
 
 ## 📝 License
 
@@ -251,11 +183,5 @@ MIT License - feel free to use this project for your portfolio!
 ---
 
 **Created by Chinmay Sawargaonkar** 🚀
-
-## 🙏 Credits
-
-Built with ❤️ by **Chinmay Sawargaonkar**
-
----
 
 **Made for Gen Z by Gen Z** ✨
