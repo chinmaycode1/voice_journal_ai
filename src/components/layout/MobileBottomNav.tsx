@@ -13,8 +13,8 @@ export function MobileBottomNav() {
   ]
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-border">
-      <div className="flex items-center justify-around h-16 px-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-border safe-area-bottom">
+      <div className="flex items-center justify-around h-16 sm:h-18 px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
           const Icon = item.icon
@@ -23,15 +23,15 @@ export function MobileBottomNav() {
             <Link
               key={item.path}
               to={item.path}
-              className="flex flex-col items-center justify-center flex-1 h-full relative"
+              className="flex flex-col items-center justify-center flex-1 h-full relative min-w-0"
             >
               <motion.div
                 whileTap={{ scale: 0.9 }}
                 className="flex flex-col items-center gap-1"
               >
                 <Icon
-                  size={22}
-                  className={isActive ? 'text-accent' : 'text-text-muted'}
+                  size={20}
+                  className={`${isActive ? 'text-accent' : 'text-text-muted'} sm:w-6 sm:h-6`}
                 />
                 <span
                   className={`text-xs ${

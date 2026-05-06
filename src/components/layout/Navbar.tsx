@@ -27,20 +27,20 @@ export function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 glass border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <Link to="/journal" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">VJ</span>
+          <Link to="/journal" className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
+              <span className="text-white font-bold text-base sm:text-lg">VJ</span>
             </div>
-            <span className="font-heading text-xl font-bold gradient-text hidden sm:block">
+            <span className="font-heading text-lg sm:text-xl font-bold gradient-text hidden sm:block">
               VoiceJournal
             </span>
           </Link>
 
-          {/* XP Progress Bar - Hidden on mobile */}
-          <div className="hidden md:block flex-1 max-w-xs mx-8">
+          {/* XP Progress Bar - Hidden on mobile and tablet */}
+          <div className="hidden lg:block flex-1 max-w-xs mx-8">
             <ProgressBar
               current={xpInfo.current}
               max={xpInfo.needed}
@@ -49,7 +49,7 @@ export function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Theme Toggle */}
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -58,9 +58,9 @@ export function Navbar() {
               className="p-2 rounded-full hover:bg-dark-glass transition-colors"
             >
               {theme === 'dark' ? (
-                <Sun size={20} className="text-text-muted" />
+                <Sun size={18} className="text-text-muted sm:w-5 sm:h-5" />
               ) : (
-                <Moon size={20} className="text-text-muted" />
+                <Moon size={18} className="text-text-muted sm:w-5 sm:h-5" />
               )}
             </motion.button>
 
@@ -75,7 +75,8 @@ export function Navbar() {
                 <Avatar
                   src={profile.avatar_url}
                   fallback={profile.username || 'U'}
-                  size={40}
+                  size={36}
+                  className="sm:w-10 sm:h-10"
                 />
               </motion.button>
 

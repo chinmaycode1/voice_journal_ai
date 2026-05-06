@@ -102,9 +102,9 @@ export function Stats() {
       <div className="min-h-screen pb-24 md:pb-8">
         <Navbar />
         
-        <main className="pt-24 px-4 max-w-6xl mx-auto space-y-8">
+        <main className="pt-20 sm:pt-24 px-4 sm:px-6 max-w-6xl mx-auto space-y-6 sm:space-y-8">
           {/* Header */}
-          <h1 className="font-heading text-3xl font-bold gradient-text">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold gradient-text">
             Your Growth
           </h1>
 
@@ -119,7 +119,7 @@ export function Stats() {
                 }
               }
             }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
           >
             {[
               {
@@ -154,12 +154,12 @@ export function Stats() {
                   visible: { opacity: 1, y: 0 }
                 }}
               >
-                <Card variant="glass" animate={false} className="text-center">
-                  <stat.icon size={32} className="mx-auto mb-3" style={{ color: stat.color }} />
-                  <div className="font-heading text-4xl font-bold mb-1" style={{ color: stat.color }}>
+                <Card variant="glass" animate={false} className="text-center p-4 sm:p-6">
+                  <stat.icon size={28} className="mx-auto mb-2 sm:mb-3 sm:w-8 sm:h-8" style={{ color: stat.color }} />
+                  <div className="font-heading text-2xl sm:text-4xl font-bold mb-1" style={{ color: stat.color }}>
                     <AnimatedNumber value={stat.value} />
                   </div>
-                  <p className="text-sm text-text-muted">{stat.label}</p>
+                  <p className="text-xs sm:text-sm text-text-muted">{stat.label}</p>
                 </Card>
               </motion.div>
             ))}

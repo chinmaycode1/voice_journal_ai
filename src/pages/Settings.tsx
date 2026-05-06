@@ -82,9 +82,9 @@ export function Settings() {
       <div className="min-h-screen pb-24 md:pb-8">
         <Navbar />
         
-        <main className="pt-24 px-4 max-w-3xl mx-auto space-y-6">
+        <main className="pt-20 sm:pt-24 px-4 sm:px-6 max-w-3xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <h1 className="font-heading text-3xl font-bold gradient-text">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold gradient-text">
             Settings
           </h1>
 
@@ -93,21 +93,22 @@ export function Settings() {
             <div className="space-y-6">
               <h2 className="font-heading text-xl font-bold text-text">Profile</h2>
               
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Avatar
                   src={profile.avatar_url}
                   fallback={profile.username || 'U'}
-                  size={80}
+                  size={64}
+                  className="sm:w-20 sm:h-20"
                 />
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   {isEditingUsername ? (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleUsernameUpdate()}
-                        className="flex-1 px-3 py-2 bg-dark-card border border-border rounded-lg text-text focus:border-accent focus:outline-none"
+                        className="flex-1 px-3 py-2 bg-dark-card border border-border rounded-lg text-text focus:border-accent focus:outline-none text-base"
                         autoFocus
                       />
                       <Button size="sm" onClick={handleUsernameUpdate}>
@@ -127,7 +128,7 @@ export function Settings() {
                       </button>
                     </div>
                   )}
-                  <p className="text-sm text-text-muted mt-1">
+                  <p className="text-xs sm:text-sm text-text-muted mt-1">
                     Member since {new Date(profile.created_at).toLocaleDateString()}
                   </p>
                 </div>

@@ -124,14 +124,14 @@ export function History() {
       <div className="min-h-screen pb-24 md:pb-8">
         <Navbar />
         
-        <main className="pt-24 px-4 max-w-4xl mx-auto space-y-6">
+        <main className="pt-20 sm:pt-24 px-4 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="font-heading text-3xl font-bold gradient-text">
+              <h1 className="font-heading text-2xl sm:text-3xl font-bold gradient-text">
                 Your Journal
               </h1>
-              <p className="text-text-muted mt-1">
+              <p className="text-text-muted mt-1 text-sm sm:text-base">
                 {entries.length} {entries.length === 1 ? 'entry' : 'entries'} total
               </p>
             </div>

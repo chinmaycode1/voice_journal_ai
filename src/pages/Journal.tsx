@@ -26,12 +26,12 @@ export function Journal() {
       <div className="min-h-screen pb-24 md:pb-8">
         <Navbar />
         
-        <main className="pt-24 px-4 mx-auto" style={{ maxWidth: 1400 }}>
+        <main className="pt-20 sm:pt-24 px-4 sm:px-6 lg:px-8 mx-auto" style={{ maxWidth: 1400 }}>
           {/* Two-column layout on desktop */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? '1fr 1.2fr' : '1fr',
-            gap: 32,
+            gap: isDesktop ? 32 : 24,
             alignItems: 'start',
           }}>
             {/* LEFT COLUMN: Avatar (sticky on desktop) */}
@@ -48,7 +48,7 @@ export function Journal() {
             </div>
 
             {/* RIGHT COLUMN: Journal controls */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Daily Prompt */}
               <DailyPrompt />
 
