@@ -192,8 +192,8 @@ function AvatarFace({
     >
       <defs>
         <radialGradient id={gradId} cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor={face.bgFrom} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={face.bgTo} stopOpacity="0.15" />
+          <stop offset="0%" stopColor={face.bgFrom} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={face.bgTo} stopOpacity={0.15} />
         </radialGradient>
         <filter id={glowId}>
           <feGaussianBlur stdDeviation="3" result="blur" />
@@ -206,7 +206,7 @@ function AvatarFace({
 
       {/* Background glow circle */}
       <motion.circle
-        cx="100" cy="100" r="95"
+        cx={100} cy={100} r={95}
         fill={`url(#${gradId})`}
         animate={{ r: isSpeaking ? [95, 98, 95] : 95 }}
         transition={{ duration: 0.4, repeat: isSpeaking ? Infinity : 0 }}
@@ -229,8 +229,8 @@ function AvatarFace({
       {/* Blush cheeks */}
       {face.blush && (
         <>
-          <ellipse cx="62" cy="120" rx="14" ry="8" fill={face.blushColor} opacity="0.4" />
-          <ellipse cx="138" cy="120" rx="14" ry="8" fill={face.blushColor} opacity="0.4" />
+          <ellipse cx={62} cy={120} rx={14} ry={8} fill={face.blushColor} opacity={0.4} />
+          <ellipse cx={138} cy={120} rx={14} ry={8} fill={face.blushColor} opacity={0.4} />
         </>
       )}
 
@@ -276,6 +276,7 @@ function AvatarFace({
         cx={face.leftEye.cx - 3} cy={face.leftEye.cy - 3}
         r={2} fill="white" opacity={0.9}
         animate={{ opacity: blinkState === 0 ? 0 : 0.9 }}
+        transition={{ duration: 0.06 }}
       />
 
       {/* Right eye white */}
@@ -308,6 +309,7 @@ function AvatarFace({
         cx={face.rightEye.cx - 3} cy={face.rightEye.cy - 3}
         r={2} fill="white" opacity={0.9}
         animate={{ opacity: blinkState === 0 ? 0 : 0.9 }}
+        transition={{ duration: 0.06 }}
       />
 
       {/* Eyebrows */}
@@ -359,6 +361,7 @@ function AvatarFace({
           rx={3}
           fill="white"
           opacity={Math.min(1, (mouthOpenAmount - 8) / 6)}
+          transition={{ duration: 0.05 }}
         />
       )}
 
