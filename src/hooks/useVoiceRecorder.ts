@@ -139,6 +139,16 @@ export function useVoiceRecorder() {
           return newTranscript
         })
         setInterimTranscript('')
+        
+        // Auto-stop after getting final result (better UX on mobile)
+        if (recognitionRef.current) {
+          console.log('⏹️ Auto-stopping after final result')
+          setTimeout(() => {
+            if (recognitionRef.current) {
+              recognitionRef.current.stop()
+            }
+          }, 500) // Small delay to ensure all results are captured
+        }
       }
     }
 

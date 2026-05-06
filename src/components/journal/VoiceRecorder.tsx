@@ -132,6 +132,7 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
 
   const handleRecordToggle = () => {
     if (isRecording) {
+      console.log('🛑 User manually stopped recording')
       stopRecording()
     } else {
       resetTranscript()
@@ -273,10 +274,10 @@ export function VoiceRecorder({ onAudioData, onSpeakingChange, onListeningChange
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-sm text-text-muted flex items-center gap-2"
+              className="text-sm text-text-muted flex items-center gap-2 justify-center"
             >
               <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              Recording...
+              Recording... (Tap to stop)
             </motion.p>
           )}
           {aiLoading && (
